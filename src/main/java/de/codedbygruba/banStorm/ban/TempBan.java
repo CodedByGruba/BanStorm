@@ -8,10 +8,10 @@ import java.util.UUID;
 
 public class TempBan extends BanBase {
     @Getter @Setter
-    private LocalDateTime unbanTime;
+    private LocalDateTime unbanDate;
 
-    public TempBan(String playerName, UUID playerUUID, String operatorName, UUID operatorUUID, String reason, LocalDateTime banTime, LocalDateTime unbanTime) {
+    public TempBan(String playerName, UUID playerUUID, String operatorName, UUID operatorUUID, String reason, LocalDateTime banTime, LocalDateTime unbanDate) {
         super(playerName, playerUUID, operatorName, operatorUUID, reason, banTime);
-        this.unbanTime = unbanTime;
+        this.unbanDate = unbanDate;
     }
 }
