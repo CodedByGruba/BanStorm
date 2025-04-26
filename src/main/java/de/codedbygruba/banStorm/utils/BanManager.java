@@ -1,6 +1,5 @@
 package de.codedbygruba.banStorm.utils;
 
-import com.mojang.brigadier.Message;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import de.codedbygruba.banStorm.BanStorm;
@@ -8,8 +7,6 @@ import de.codedbygruba.banStorm.ban.BanBase;
 import de.codedbygruba.banStorm.ban.PermBan;
 import de.codedbygruba.banStorm.ban.TempBan;
 import de.codedbygruba.banStorm.repository.BanRepository;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -50,8 +47,9 @@ public class BanManager {
         banRepository.addBan(ban);
         broadcastBan(ban);
     }
-    public void unban(String playerName, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void unban(CommandSource sender, String playerName) {
+        banRepository.removeBan(UUID.fromString(mojangAPI.getUUID(playerName)));
+        broadcastUnBan(sender, playerName);
     }
 
     private void broadcastBan(BanBase ban) {
@@ -67,11 +65,23 @@ public class BanManager {
                     plugin.banStormPrefix,
                     ban.getPlayerName(),
                     ban.getOperatorName(),
-                    ban.getReason());
+                    ban.getReason()
+                );
+        broadcastMessage(broadcastMessage);
+    }
 
+    private void broadcastUnBan(CommandSource sender, String playerName) {
+        String broadcastMessage = MessageFormat.format("{0}{1} was unbanned by {2}",
+                plugin.banStormPrefix,
+                playerName,
+                sender instanceof  Player ? ((Player) sender).getUsername() : "System"
+        );
+        broadcastMessage(broadcastMessage);
+    }
+    private void broadcastMessage(String message) {
         for (Player p : plugin.getServer().getAllPlayers()) {
             //TODO: Permission control
-            p.sendMessage(plugin.mmDeserialize(broadcastMessage));
+            p.sendMessage(plugin.mmDeserialize(message));
         }
     }
 }

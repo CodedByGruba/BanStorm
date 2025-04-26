@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BanRepository {
 
-
     private static BanRepository instance;
     public static BanRepository getInstance() {
         if (instance == null) {
