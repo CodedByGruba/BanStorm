@@ -18,14 +18,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BanRepository {
 
     private static BanRepository instance;
+
+    public static void init(Path path) {
+        if (instance == null) {
+            instance = new BanRepository(path);
+        }
+    }
+
     public static BanRepository getInstance() {
         if (instance == null) {
-            instance = new BanRepository(plugin.getPath());
+            System.err.println("BanRepository instance was not created! Have you called BanRepository#init() first?");
         }
         return instance;
     }
 
-    private static final BanStorm plugin = BanStorm.getInstance();
     private final File storageFile;
     private final ObjectMapper objectMapper;
     private final Map<UUID, BanBase> banMap = new ConcurrentHashMap<>();
