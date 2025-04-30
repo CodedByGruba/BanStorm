@@ -29,27 +29,48 @@ public class BanManager {
     private final BanStorm plugin = BanStorm.getInstance();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm");
 
-    public void ban(CommandSource sender, String playerName, String reason) {
-        var senderName = sender instanceof Player ? ((Player) sender).getUsername() : "System";
-        var senderUUID = sender instanceof Player ? ((Player) sender).getUniqueId() : null;
-
-        PermBan ban = new PermBan(playerName, UUID.fromString(mojangAPI.getUUID(playerName)), senderName, senderUUID, reason, LocalDateTime.now());
-
-        banRepository.addBan(ban);
-        broadcastBan(ban);
+    public void ban(CommandSource source, String playerName, String reason) {
+        handleBan(source, playerName, reason, null);
     }
-    public void ban(CommandSource sender, String playerName, String reason, LocalDateTime unbanDate) {
-        var senderName = sender instanceof Player ? ((Player) sender).getUsername() : "System";
-        var senderUUID = sender instanceof Player ? ((Player) sender).getUniqueId() : null;
 
-        TempBan ban = new TempBan(playerName, UUID.fromString(mojangAPI.getUUID(playerName)), senderName, senderUUID, reason, LocalDateTime.now(), unbanDate);
-
-        banRepository.addBan(ban);
-        broadcastBan(ban);
+    public void ban(CommandSource source, String playerName, String reason, String unbanTimeDaysString) {
+        handleBan(source, playerName, reason, unbanTimeDaysString);
     }
+
     public void unban(CommandSource sender, String playerName) {
-        banRepository.removeBan(UUID.fromString(mojangAPI.getUUID(playerName)));
+        banRepository.removeBan(mojangAPI.getUUID(playerName));
         broadcastUnBan(sender, playerName);
+    }
+
+    private void handleBan(CommandSource source, String playerName, String reason, String unbanTimeDaysString) {
+        String senderName = (source instanceof Player player) ? player.getUsername() : "System";
+        UUID senderUUID = (source instanceof Player player) ? player.getUniqueId() : null;
+
+        UUID playerUUID = mojangAPI.getUUID(playerName);
+        if (playerUUID == null) {
+            source.sendMessage(plugin.mmDeserialize(MessageFormat.format(
+                    "{0}<red>Player {1} not found!", plugin.banStormPrefix, playerName)));
+            return;
+        }
+
+        BanBase ban;
+        if (unbanTimeDaysString == null) {
+            ban = new PermBan(playerName, playerUUID, senderName, senderUUID, reason, LocalDateTime.now());
+        } else {
+            int days;
+            try {
+                days = Integer.parseInt(unbanTimeDaysString);
+            } catch (NumberFormatException e) {
+                source.sendMessage(plugin.mmDeserialize(MessageFormat.format(
+                        "{0}<red>Usage: /ban [player] [reason] [time in days]", plugin.banStormPrefix)));
+                return;
+            }
+            ban = new TempBan(playerName, playerUUID, senderName, senderUUID, reason,
+                    LocalDateTime.now(), LocalDateTime.now().plusDays(days));
+        }
+
+        banRepository.addBan(ban);
+        broadcastBan(ban);
     }
 
     private void broadcastBan(BanBase ban) {

@@ -9,6 +9,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.codedbygruba.banStorm.commands.BanCommandHandler;
+import de.codedbygruba.banStorm.commands.DebugCommandHandler;
 import de.codedbygruba.banStorm.repository.BanRepository;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -25,7 +26,7 @@ import java.nio.file.Path;
 )
 public class BanStorm {
     //TODO: Permissions
-    public final String banStormPrefix = "<gray>[</gray><gradient:#8e2de2:#4a00e0>Banstorm</gradient><gray>]</gray>";
+    public final String banStormPrefix = "<gray>[</gray><gradient:#8e2de2:#4a00e0>Banstorm</gradient><gray>]</gray> ";
 
     @Getter
     private static BanStorm instance;
@@ -41,14 +42,6 @@ public class BanStorm {
         this.logger = logger;
         this.path = path;
     }
-/*    @Inject
-    private Logger logger;
-
-    @Inject @Getter
-    private ProxyServer server;
-
-    @Inject @DataDirectory
-    private Path path;*/
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
@@ -66,5 +59,6 @@ public class BanStorm {
 
         CommandMeta banMeta = cm.metaBuilder("ban").plugin(this).build();
         cm.register(banMeta, new BanCommandHandler());
+        cm.register("test", new DebugCommandHandler());
     }
 }
