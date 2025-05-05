@@ -11,7 +11,6 @@ import de.codedbygruba.banStorm.repository.BanRepository;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 public class BanManager {
     //TODO: Make operations async
@@ -37,16 +36,26 @@ public class BanManager {
         handleBan(source, playerName, reason, unbanTimeDaysString);
     }
 
-    public void unban(CommandSource sender, String playerName) {
+    public void unban(CommandSource source, String playerName) {
+        var playerUUID = mojangAPI.getUUID(playerName);
+
+        if (playerUUID == null) {
+            source.sendMessage(plugin.mmDeserialize(MessageFormat.format("{0}<red>Player not found!", plugin.banStormPrefix)));
+            return;
+        } else if (!banRepository.isBanned(playerUUID)) {
+            source.sendMessage(plugin.mmDeserialize(MessageFormat.format("{0}<red>{1} is not banned!", plugin.banStormPrefix, playerName)));
+            return;
+        }
+
         banRepository.removeBan(mojangAPI.getUUID(playerName));
-        broadcastUnBan(sender, playerName);
+        broadcastUnBan(source, playerName);
     }
 
     private void handleBan(CommandSource source, String playerName, String reason, String unbanTimeDaysString) {
-        String senderName = (source instanceof Player player) ? player.getUsername() : "System";
-        UUID senderUUID = (source instanceof Player player) ? player.getUniqueId() : null;
+        var senderName = (source instanceof Player player) ? player.getUsername() : "System";
+        var senderUUID = (source instanceof Player player) ? player.getUniqueId() : null;
 
-        UUID playerUUID = mojangAPI.getUUID(playerName);
+        var playerUUID = mojangAPI.getUUID(playerName);
         if (playerUUID == null) {
             source.sendMessage(plugin.mmDeserialize(MessageFormat.format(
                     "{0}<red>Player {1} not found!", plugin.banStormPrefix, playerName)));
@@ -95,10 +104,11 @@ public class BanManager {
         String broadcastMessage = MessageFormat.format("{0}{1} was unbanned by {2}",
                 plugin.banStormPrefix,
                 playerName,
-                sender instanceof  Player ? ((Player) sender).getUsername() : "System"
+                sender instanceof Player ? ((Player) sender).getUsername() : "System"
         );
         broadcastMessage(broadcastMessage);
     }
+
     private void broadcastMessage(String message) {
         for (Player p : plugin.getServer().getAllPlayers()) {
             //TODO: Permission control

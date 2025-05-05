@@ -1,7 +1,6 @@
 package de.codedbygruba.banStorm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.codedbygruba.banStorm.BanStorm;
 import de.codedbygruba.banStorm.ban.BanBase;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -57,11 +56,6 @@ public class BanRepository {
         banMap.remove(playerUUID);
         save();
     }
-
-    public Optional<BanBase> getBan(UUID playerUUID) {
-        return Optional.ofNullable(banMap.get(playerUUID));
-    }
-
     public Collection<BanBase> getAllBans() {
         return Collections.unmodifiableCollection(banMap.values());
     }
@@ -69,6 +63,7 @@ public class BanRepository {
     public boolean isBanned(UUID playerUUID) {
         return banMap.containsKey(playerUUID);
     }
+    
 
     private void save() {
         try {

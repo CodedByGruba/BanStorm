@@ -3,6 +3,7 @@ package de.codedbygruba.banStorm;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
@@ -10,6 +11,8 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.codedbygruba.banStorm.commands.BanCommandHandler;
 import de.codedbygruba.banStorm.commands.DebugCommandHandler;
+import de.codedbygruba.banStorm.commands.UnbanCommandHandler;
+import de.codedbygruba.banStorm.listeners.BanListener;
 import de.codedbygruba.banStorm.repository.BanRepository;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -47,7 +50,9 @@ public class BanStorm {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         instance = this;
         BanRepository.init(path);
+
         registerCommands();
+        registerListeners();
     }
 
     public Component mmDeserialize(String message) {
@@ -57,8 +62,18 @@ public class BanStorm {
     private void registerCommands() {
         CommandManager cm = server.getCommandManager();
 
-        CommandMeta banMeta = cm.metaBuilder("ban").plugin(this).build();
-        cm.register(banMeta, new BanCommandHandler());
+        CommandMeta banCommandMeta = cm.metaBuilder("ban").plugin(this).build();
+        cm.register(banCommandMeta, new BanCommandHandler());
+
+        CommandMeta unbanCommandMeta = cm.metaBuilder("unban").plugin(this).build();
+        cm.register(unbanCommandMeta, new UnbanCommandHandler());
+
         cm.register("test", new DebugCommandHandler());
+    }
+
+    private void registerListeners() {
+        EventManager em = server.getEventManager();
+
+        em.register(this, new BanListener());
     }
 }

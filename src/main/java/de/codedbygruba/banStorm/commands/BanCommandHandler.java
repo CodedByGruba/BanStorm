@@ -5,7 +5,6 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import de.codedbygruba.banStorm.BanStorm;
 import de.codedbygruba.banStorm.utils.BanManager;
-import net.kyori.adventure.text.Component;
 
 import java.text.MessageFormat;
 
@@ -16,7 +15,7 @@ public class BanCommandHandler implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
-        //TODO: Permission Conntrol
+        //TODO: Permission Control
         CommandSource source = invocation.source();
         Player player = (Player) source;
         String[] args = invocation.arguments();
