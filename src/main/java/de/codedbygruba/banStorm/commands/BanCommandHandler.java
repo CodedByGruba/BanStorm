@@ -7,6 +7,7 @@ import de.codedbygruba.banStorm.BanStorm;
 import de.codedbygruba.banStorm.utils.BanManager;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 public class BanCommandHandler implements SimpleCommand {
 
@@ -20,15 +21,24 @@ public class BanCommandHandler implements SimpleCommand {
         Player player = (Player) source;
         String[] args = invocation.arguments();
 
-        switch (args.length) {
-            case 2:
-                banManager.ban(source, args[0], args[1]);
-                break;
-            case 3:
-                banManager.ban(source, args[0], args[1], args[2]);
-                break;
-            default:
-                source.sendMessage(plugin.mmDeserialize(MessageFormat.format("{0}<red>Usage: /ban [player] [reason] [time in days (optional)]", plugin.banStormPrefix)));
+        if (args.length > 2) {
+            source.sendMessage(plugin.mmDeserialize(MessageFormat.format("{0}<red>Usage: /ban [player] [time in days (optional)] [reason]", plugin.banStormPrefix)));
+            return;
+        }
+
+        if (tryParseInt(args[1])) {
+            banManager.ban(source, args[0], String.join(" ", Arrays.copyOfRange(args, 2, args.length)), args[1]);
+        } else {
+            banManager.ban(source, args[0], String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+        }
+    }
+
+    private boolean tryParseInt(String inputString) {
+        try {
+            Integer.parseInt(inputString);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

@@ -14,6 +14,7 @@ import de.codedbygruba.banStorm.commands.DebugCommandHandler;
 import de.codedbygruba.banStorm.commands.UnbanCommandHandler;
 import de.codedbygruba.banStorm.listeners.BanListener;
 import de.codedbygruba.banStorm.repository.BanRepository;
+import de.codedbygruba.banStorm.utils.BanManager;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -30,6 +31,8 @@ import java.nio.file.Path;
 public class BanStorm {
     //TODO: Permissions
     public final String banStormPrefix = "<gray>[</gray><gradient:#8e2de2:#4a00e0>Banstorm</gradient><gray>]</gray> ";
+
+    private final BanManager banManager = BanManager.getInstance();
 
     @Getter
     private static BanStorm instance;
@@ -53,6 +56,8 @@ public class BanStorm {
 
         registerCommands();
         registerListeners();
+
+        banManager.startExpiredBanCheck();
     }
 
     public Component mmDeserialize(String message) {

@@ -11,6 +11,7 @@ import de.codedbygruba.banStorm.repository.BanRepository;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 
 public class BanManager {
     //TODO: Make operations async
@@ -49,6 +50,10 @@ public class BanManager {
 
         banRepository.removeBan(mojangAPI.getUUID(playerName));
         broadcastUnBan(source, playerName);
+    }
+
+    public void startExpiredBanCheck() {
+        plugin.getServer().getScheduler().buildTask(plugin, banRepository::checkAndRemoveExpiredBans).repeat(60, TimeUnit.SECONDS).delay(0, TimeUnit.SECONDS).schedule();
     }
 
     private void handleBan(CommandSource source, String playerName, String reason, String unbanTimeDaysString) {
@@ -115,4 +120,5 @@ public class BanManager {
             p.sendMessage(plugin.mmDeserialize(message));
         }
     }
+
 }

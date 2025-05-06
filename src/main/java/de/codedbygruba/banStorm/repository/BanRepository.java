@@ -6,11 +6,14 @@ import de.codedbygruba.banStorm.ban.BanBase;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import de.codedbygruba.banStorm.ban.PermBan;
+import de.codedbygruba.banStorm.ban.TempBan;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,7 +66,15 @@ public class BanRepository {
     public boolean isBanned(UUID playerUUID) {
         return banMap.containsKey(playerUUID);
     }
-    
+
+    public void checkAndRemoveExpiredBans() {
+        for (var ban : banMap.values()) {
+            if (ban instanceof TempBan tempBan && tempBan.getUnbanDate().isBefore(LocalDateTime.now())) {
+                removeBan(ban.getPlayerUUID());
+                System.out.println("Removed expired ban " + ban.getPlayerUUID());
+            }
+        }
+    }
 
     private void save() {
         try {
